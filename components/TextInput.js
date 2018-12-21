@@ -12,7 +12,7 @@ import { Fonts, Colors } from '../constants';
 class RNSTextInput extends React.Component {
   static propTypes = {
     type: PropTypes.oneOf(['primary', 'secondary', 'bordered']),
-    style: PropTypes.number,
+    style: PropTypes.object,
     placeholderTextColor: PropTypes.string,
   };
 

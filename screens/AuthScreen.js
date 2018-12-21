@@ -21,10 +21,12 @@ export default class AuthScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
-  
+
   state = {
     anim: new Animated.Value(0),
     isKeyboardVisible: false,
+    username: "",
+    password: "",
   };
 
   componentWillMount() {
@@ -70,8 +72,7 @@ export default class AuthScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('AuthLoading');
+    this.props.navigation.navigate('AuthLoading', {username: this.state.username, password: this.state.password});
   };
 
   render() {
@@ -99,12 +100,14 @@ export default class AuthScreen extends React.Component {
               style={styles.textInput}
               autoCapitalize="none"
               autoCorrect={false}
+              onChangeText={(text) => this.setState({ username: text })}
             />
 
             <TextInput
               placeholder="Password"
               secureTextEntry
               style={styles.textInput}
+              onChangeText={(text) => this.setState({ password: text })}
             />
 
             <Animated.View style={[styles.section, styles.bottom, this.fadeIn(700, -20)]}>

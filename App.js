@@ -1,8 +1,12 @@
 import React from 'react';
+import Expo, {SQLite} from 'expo'
 import { Platform, StatusBar, StyleSheet, View, UIManager } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
 import Colors from './constants/Colors';
+import md5 from 'md5';
+
+const db = SQLite.openDatabase('FoodNoteDB.db');
 
 export default class App extends React.Component {
   state = {
@@ -12,6 +16,54 @@ export default class App extends React.Component {
   componentDidMount() {
     console.disableYellowBox = true;
     UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+
+    db.transaction(function(txn) {
+      txn.executeSql(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='users'",
+        [],
+        function(tx, res) {
+          console.log('item:', res.rows.length);
+          if (res.rows.length == 0) {
+            txn.executeSql('DROP TABLE IF EXISTS users', []);
+            txn.executeSql(
+              'CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(30) UNIQUE, password VARCHAR(255), is_admin BOOLEAN, is_active BOOLEAN DEFAULT(TRUE))',
+              []
+            );
+            txn.executeSql('DROP TABLE IF EXISTS images', []);
+            txn.executeSql(
+              "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, time DATETIME DEFAULT(datetime('now','localtime')), photo VARCHAR(255), name VARCHAR(255), description VARCHAR(255), address VARCHAR(255), price DOUBLE(7,2), user_id INTEGER, is_active BOOLEAN DEFAULT(TRUE))",
+              []
+            );
+            txn.executeSql('DROP TABLE IF EXISTS logs', []);
+            txn.executeSql(
+              "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, description VARCHAR(255), time DATETIME DEFAULT(datetime('now','localtime')))",
+              []
+            );
+            txn.executeSql(
+              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
+              ['administrator', md5('secret'), true, true]
+            );
+            txn.executeSql(
+              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
+              ['administrator2', md5('secret'), true, true]
+            );
+            txn.executeSql(
+              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
+              ['johndoe', md5('helloworld'), false, true]
+            );
+            txn.executeSql(
+              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
+              ['reynold', md5('welcome'), false, true]
+            );
+            txn.executeSql(
+              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
+              ['bumblebee', md5('yellow'), false, false]
+            );
+
+          }
+        }
+      );
+    });
   }
 
   render() {
