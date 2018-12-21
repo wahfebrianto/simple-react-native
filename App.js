@@ -1,12 +1,18 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View, UIManager } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
+import Colors from './constants/Colors';
 
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
   };
+
+  componentDidMount() {
+    console.disableYellowBox = true;
+    UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
 
   render() {
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
@@ -20,7 +26,7 @@ export default class App extends React.Component {
     } else {
       return (
         <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+          <StatusBar barStyle="light-content" backgroundColor={Colors.watermelon} />
           <AppNavigator />
         </View>
       );
@@ -34,11 +40,15 @@ export default class App extends React.Component {
         require('./assets/images/robot-prod.png'),
       ]),
       Font.loadAsync({
-        // This is the font that we are using for our tab bar
-        ...Icon.Ionicons.font,
-        // We include SpaceMono because we use it in HomeScreen.js. Feel free
-        // to remove this if you are not using it in your app
         'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
+        'Lato-Bold': require('./assets/fonts/Lato-Bold.ttf'),
+        'Lato-BoldItalic': require('./assets/fonts/Lato-BoldItalic.ttf'),
+        'Lato-Italic': require('./assets/fonts/Lato-Italic.ttf'),
+        'Lato-Light': require('./assets/fonts/Lato-Light.ttf'),
+        'Lato-Medium': require('./assets/fonts/Lato-Medium.ttf'),
+        'Lato-Regular': require('./assets/fonts/Lato-Regular.ttf'),
+        'Lato-Semibold': require('./assets/fonts/Lato-Semibold.ttf'),
+        'Lato-Thin': require('./assets/fonts/Lato-Thin.ttf'),
       }),
     ]);
   };
