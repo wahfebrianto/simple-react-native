@@ -13,21 +13,21 @@ import {
   Dimensions,
   AsyncStorage,
 } from 'react-native';
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 import { Fonts, Colors } from '../constants';
 import { TextInput, Button} from '../components';
 
 export default class AuthScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
-
-  state = {
-    anim: new Animated.Value(0),
-    isKeyboardVisible: false,
-    username: "",
-    password: "",
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      anim: new Animated.Value(0),
+      isKeyboardVisible: false,
+      username: "",
+      password: "",
+    }
+  }
 
   componentWillMount() {
     this.keyboardDidShowListener = Keyboard.addListener(Platform.select({ android: 'keyboardDidShow', ios: 'keyboardWillShow' }), this._keyboardDidShow.bind(this));
@@ -36,6 +36,22 @@ export default class AuthScreen extends React.Component {
 
   componentDidMount() {
     Animated.timing(this.state.anim, { toValue: 3000, duration: 3000 }).start();
+    const errorMessage = this.props.navigation.getParam('errorMessage', '');
+    const firstAttempt = this.props.navigation.getParam('firstAttempt', true);
+    if(errorMessage != '' && !firstAttempt)
+    {
+      showMessage({
+        message: errorMessage,
+        type: "danger",
+        position: {
+          top: 370,
+          right: 10,
+          bottom: 50,
+          left: 10,
+        },
+        floating: true,
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -46,6 +62,7 @@ export default class AuthScreen extends React.Component {
   _keyboardDidShow() {
     LayoutAnimation.easeInEaseOut();
     this.setState({ isKeyboardVisible: true });
+    hideMessage();
   }
 
   _keyboardDidHide() {
@@ -72,12 +89,11 @@ export default class AuthScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    this.props.navigation.navigate('AuthLoading', {username: this.state.username, password: this.state.password});
+    this.props.navigation.navigate('AuthLoading', {username: this.state.username, password: this.state.password, firstAttempt: false});
   };
 
   render() {
     const TopComponent = Platform.select({ ios: KeyboardAvoidingView, android: View });
-
     return (
       <View style={[styles.container, { paddingBottom: this.state.isKeyboardVisible ? 270 : 0 }]}>
         <ImageBackground

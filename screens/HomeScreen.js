@@ -1,201 +1,250 @@
 import React from 'react';
 import {
-  Image,
-  Platform,
-  ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
-  AsyncStorage,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
-import { WebBrowser } from 'expo';
+import { SearchBar } from 'react-native-elements';
+import { AntDesign } from '@expo/vector-icons';
 
-import { MonoText } from '../components/StyledText';
-import { Button } from '../components';
+import { Colors, Fonts } from '../constants';
+import { Button, TextInput, GridRow } from '../components';
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
+    };
+    this._openArticle = this._openArticle.bind(this);
+    this.renderRow = this.renderRow.bind(this);
+    this.addNewPhoto = this.addNewPhoto.bind(this);
+  }
 
-  _signOutAsync = async () => {
-    await AsyncStorage.clear();
-    this.props.navigation.navigate('AuthLoading');
-  };
+  componentDidMount() {
+    // this.props.gridStateActions.loadData(); LOAD DATA
+    const listData = [{
+      id: "1",
+      username: 'Jackrexx',
+      name: 'CHICKEN STEAK BURGER',
+      description: 'Chicken steak inside the burger',
+      price: 1.99,
+      photo: 'https://reactnativestarter.com/demo/images/city-sunny-people-street.jpg',
+    }, {
+      id: "2",
+      username: 'reynoldkevin',
+      name: 'HONGKONG FRIED RICE',
+      description: 'Fried rice with carrot, greenbeans, and beef',
+      price: 3.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-26549.jpg',
+    }, {
+      id: "3",
+      username: 'tancejang',
+      name: 'SALMON SUSHI',
+      description: 'Sushi with salmon inside',
+      price: 7.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-30360.jpg',
+    }, {
+      id: "4",
+      username: 'blacklarsa',
+      name: 'CANTONESE FRIED NOODLE',
+      description: 'Fried noodle with cantonese style',
+      price: 5.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-37839.jpg',
+    }, {
+      id: "5",
+      username: 'ardyputra',
+      name: 'GREEN SALAD',
+      description: 'Salad with many green and fresh vegetables',
+      price: 2.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-69212.jpg',
+    }, {
+      id: "6",
+      username: 'stevenchristian',
+      name: 'FISH FILLET BURGER',
+      description: 'Burger with fish fillet inside',
+      price: 3.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-108061.jpg',
+    },
+    {
+      id: "7",
+      username: 'gregorian',
+      name: 'WAGYU STEAK',
+      description: 'Wagyu steak with barbeque sauce',
+      price: 22.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-126371.jpg',
+    }, {
+      id: "8",
+      username: 'RKW',
+      name: 'HAINANESE CHICKEN RICE',
+      description: 'Chicken rice with hainanese style',
+      price: 6.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-165888.jpg',
+    }, {
+      id: "9",
+      username: 'hufungxian',
+      name: 'WONTON NOODLE',
+      description: 'Soup noodle with pork wonton',
+      price: 3.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-167854.jpg',
+    }, {
+      id: "10",
+      username: 'yosikristian',
+      name: 'BABY OCTOPUS SANDWICH',
+      description: 'Sandwich with baby octopus inside',
+      price: 11.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-173427.jpg',
+    }, {
+      id: "11",
+      username: 'rhomairama',
+      name: 'TURKEY STEAK',
+      description: 'Steak made by turkey chest',
+      price: 21.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-175696.jpg',
+    }, {
+      id: "12",
+      username: 'iisdahlia',
+      name: 'JAPANESE CHICKEN CURRY RICE',
+      description: 'Japanese chicken curry rice with vegetables',
+      price: 4.99,
+      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-175733.jpg',
+    }];
+    this.setState({
+      data: listData,
+    });
+  }
+
+  _openArticle(article) {
+    // this.props.navigate({ routeName: 'Article', params: { ...article } }); SHOW DATA
+  }
+
+  renderRow({ item }) {
+    return (
+      <TouchableOpacity
+        key={item.id}
+        style={styles.itemContainer}
+        onPress={() => this._openArticle(item)}
+      >
+        <View style={styles.itemSubContainer}>
+          <Image
+            source={{ uri: item.photo }}
+            style={styles.itemImage}
+          />
+          <View style={styles.itemContent}>
+            <Text style={styles.itemBrand}>{item.username}</Text>
+            <View>
+              <Text style={styles.itemTitle}>{item.name}</Text>
+              <Text style={styles.itemSubtitle} numberOfLines={1}>{item.description}</Text>
+            </View>
+            <View style={styles.itemMetaContainer}>
+              <Text style={styles.itemPrice}>${item.price}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.itemHr} />
+      </TouchableOpacity>
+    );
+  }
+
+  addNewPhoto() {
+    this.props.navigation.navigate('AddPhoto');
+  }
 
   render() {
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
-          </View>
-
-          <View style={styles.getStartedContainer}>
-            {this._maybeRenderDevelopmentModeWarning()}
-
-            <Text style={styles.getStartedText}>Get started by opening</Text>
-
-            <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-              <MonoText style={styles.codeHighlightText}>screens/HomeScreen.js</MonoText>
-            </View>
-
-            <Text style={styles.getStartedText}>
-              Hi My Name is Wahyu Febrianto
-            </Text>
-            <Button
-              secondary
-              rounded
-              caption="Logout"
-              onPress={this._signOutAsync}
-            />
-          </View>
-
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
-
-          <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
-          </View>
+        <View style={{ height: 50 }}>
+        <SearchBar
+          lightTheme
+          searchIcon={{ size: 24 }}
+          placeholder='Search' />
         </View>
+        <FlatList
+          keyExtractor={item => item.id}
+          style={{ backgroundColor: Colors.white, paddingHorizontal: 15 }}
+          data={this.state.data}
+          renderItem={this.renderRow}
+        />
+        <TouchableOpacity
+         style={styles.actionButton}
+         onPress={this.addNewPhoto}
+        >
+          <AntDesign name="plus" size={20} color="#ffffff" />
+        </TouchableOpacity>
       </View>
     );
   }
-
-  _maybeRenderDevelopmentModeWarning() {
-    if (__DEV__) {
-      const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-          Learn more
-        </Text>
-      );
-
-      return (
-        <Text style={styles.developmentModeText}>
-          Development mode is enabled, your app will be slower but you can use useful development
-          tools. {learnMoreButton}
-        </Text>
-      );
-    } else {
-      return (
-        <Text style={styles.developmentModeText}>
-          You are not in development mode, your app will run at full speed.
-        </Text>
-      );
-    }
-  }
-
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
-  };
-
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
-    );
-  };
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
   },
-  developmentModeText: {
-    marginBottom: 20,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center',
+  itemContainer: {
+    backgroundColor: 'white',
   },
-  contentContainer: {
-    paddingTop: 30,
+  itemSubContainer: {
+    flexDirection: 'row',
+    paddingVertical: 10,
   },
-  welcomeContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  welcomeImage: {
+  itemImage: {
+    height: 100,
     width: 100,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 3,
-    marginLeft: -10,
   },
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50,
+  itemContent: {
+    flex: 1,
+    paddingLeft: 15,
+    justifyContent: 'space-between',
   },
-  homeScreenFilename: {
-    marginVertical: 7,
-  },
-  codeHighlightText: {
-    color: 'rgba(96,100,109, 0.8)',
-  },
-  codeHighlightContainer: {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-  getStartedText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    lineHeight: 24,
-    textAlign: 'center',
-  },
-  tabBarInfoContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'black',
-        shadowOffset: { height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 20,
-      },
-    }),
-    alignItems: 'center',
-    backgroundColor: '#fbfbfb',
-    paddingVertical: 20,
-  },
-  tabBarInfoText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    textAlign: 'center',
-  },
-  navigationFilename: {
-    marginTop: 5,
-  },
-  helpContainer: {
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
+  itemBrand: {
+    fontFamily: Fonts.primaryRegular,
     fontSize: 14,
-    color: '#2e78b7',
+    color: '#617ae1',
+  },
+  itemTitle: {
+    fontFamily: Fonts.primaryBold,
+    fontSize: 16,
+    color: '#5F5F5F',
+  },
+  itemSubtitle: {
+    fontFamily: Fonts.primaryRegular,
+    fontSize: 12,
+    color: '#a4a4a4',
+  },
+  itemMetaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  itemPrice: {
+    fontFamily: Fonts.primaryRegular,
+    fontSize: 15,
+    color: '#5f5f5f',
+    textAlign: 'right',
+  },
+  itemHr: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e3e3e3',
+    marginRight: -15,
+  },
+  textInput: {
+    alignSelf: 'stretch',
+    marginTop: 20,
+  },
+  actionButton: {
+    alignItems:'center',
+    justifyContent:'center',
+    width:50,
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    height: 50,
+    backgroundColor:'#617ae1',
+    borderRadius:100,
   },
 });

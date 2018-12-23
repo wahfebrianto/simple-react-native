@@ -1,5 +1,4 @@
 import React from 'react';
-import Expo, {SQLite} from 'expo';
 import {
   ActivityIndicator,
   AsyncStorage,
@@ -9,15 +8,11 @@ import {
 } from 'react-native';
 import md5 from 'md5';
 
-const db = SQLite.openDatabase('FoodNoteDB.db');
+import Database from '../constants/Database';
 
 export default class AuthLoadingScreen extends React.Component {
   constructor(props) {
     super(props);
-    const {navigation} = this.props;
-    this.state = {
-      navigation: navigation
-    }
     this._bootstrapAsync();
   }
 
@@ -30,28 +25,29 @@ export default class AuthLoadingScreen extends React.Component {
     const userToken = await AsyncStorage.getItem('userToken');
     if(userToken)
     {
-      this.state.navigation.navigate('Main');
+      this.props.navigation.navigate('Main');
     }
     else
     {
-      const username = this.state.navigation.getParam('username', '');
-      const password = this.state.navigation.getParam('password', '');
+      const username = this.props.navigation.getParam('username', '');
+      const password = this.props.navigation.getParam('password', '');
+      const firstAttempt = this.props.navigation.getParam('firstAttempt', true);
       if(username == '' || password == '') {
-        this.state.navigation.navigate('Auth', {errorMessage: 'Please fill Username and Password!'});
+        this.props.navigation.navigate('Auth', {errorMessage: "Please fill Username and Password!", firstAttempt: firstAttempt});
       }
       else {
         var self = this;
-        db.transaction(function(txn) {
+        Database.transaction(function(txn) {
           txn.executeSql(
-            "SELECT id, is_admin FROM users WHERE username=? AND password=? AND is_active=?",
+            "SELECT id, username, is_admin FROM users WHERE username=? AND password=? AND is_active=?",
             [username, md5(password), true],
             function(tx, res) {
               if (res.rows.length > 0) {
                 self._saveUserToken(res.rows._array[0]);
-                self.state.navigation.navigate('Main');
+                self.props.navigation.navigate('Main');
               }
               else {
-                self.state.navigation.navigate('Auth', {errorMessage: 'Credential not found!'});
+                self.props.navigation.navigate('Auth', {errorMessage: 'Credential not found!', firstAttempt: firstAttempt});
               }
             }
           );
