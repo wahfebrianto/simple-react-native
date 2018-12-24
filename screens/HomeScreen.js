@@ -13,13 +13,16 @@ import { AntDesign } from '@expo/vector-icons';
 import { Colors, Fonts } from '../constants';
 import { Button, TextInput, GridRow } from '../components';
 
+import Database from '../constants/Database';
+
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      search: "%%",
     };
-    this._openArticle = this._openArticle.bind(this);
+    this._openData = this._openData.bind(this);
     this.renderRow = this.renderRow.bind(this);
     this.addNewPhoto = this.addNewPhoto.bind(this);
   }
@@ -112,13 +115,29 @@ export default class HomeScreen extends React.Component {
       price: 4.99,
       photo: 'https://reactnativestarter.com/demo/images/pexels-photo-175733.jpg',
     }];
-    this.setState({
-      data: listData,
-    });
+    const didFocusSubscription = this.props.navigation.addListener(
+      'didFocus',
+      payload => {
+        this.loadData();
+      }
+    );
   }
 
-  _openArticle(article) {
-    // this.props.navigate({ routeName: 'Article', params: { ...article } }); SHOW DATA
+  loadData() {
+    Database.transaction(
+      txn => {
+        txn.executeSql("select id, username, name, description, price, photo, address from images where is_active=1 AND (username like ? OR name like ?) order by id desc", [this.state.search, this.state.search], (tx, res) => {
+          this.setState({
+            data: res.rows._array,
+          });
+        }, () => console.log('gagal'));
+      },
+      null,
+    );
+  }
+
+  _openData(data) {
+    this.props.navigation.navigate('Photo', {itemId: data});
   }
 
   renderRow({ item }) {
@@ -126,7 +145,7 @@ export default class HomeScreen extends React.Component {
       <TouchableOpacity
         key={item.id}
         style={styles.itemContainer}
-        onPress={() => this._openArticle(item)}
+        onPress={() => this._openData(item)}
       >
         <View style={styles.itemSubContainer}>
           <Image
@@ -140,7 +159,7 @@ export default class HomeScreen extends React.Component {
               <Text style={styles.itemSubtitle} numberOfLines={1}>{item.description}</Text>
             </View>
             <View style={styles.itemMetaContainer}>
-              <Text style={styles.itemPrice}>${item.price}</Text>
+              <Text style={styles.itemPrice}>${item.price+""}</Text>
             </View>
           </View>
         </View>
@@ -153,6 +172,11 @@ export default class HomeScreen extends React.Component {
     this.props.navigation.navigate('AddPhoto');
   }
 
+  searchbarType(text) {
+    this.setState({search: '%'+text+'%'});
+    this.loadData();
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -160,7 +184,8 @@ export default class HomeScreen extends React.Component {
         <SearchBar
           lightTheme
           searchIcon={{ size: 24 }}
-          placeholder='Search' />
+          placeholder='Search'
+          onChangeText={(text) => this.searchbarType(text)} />
         </View>
         <FlatList
           keyExtractor={item => item.id}

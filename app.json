@@ -23,7 +23,11 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.wahfebrianto.FoodNote",
       "supportsTablet": false
+    },
+    "android": {
+      "package": "com.wahfebrianto.FoodNote"
     }
   }
 }

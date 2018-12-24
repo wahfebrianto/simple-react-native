@@ -14,6 +14,7 @@ import { SimpleLineIcons, Ionicons } from '@expo/vector-icons';
 import { Fonts, Colors } from '../constants';
 import HomeScreen from '../screens/HomeScreen';
 import AddPhotoScreen from '../screens/AddPhotoScreen';
+import PhotoScreen from '../screens/PhotoScreen';
 import NavigationService from './NavigationService';
 
 const headerBackground = require('../assets/images/topBarBg.png');
@@ -91,7 +92,24 @@ const MemberStack = createStackNavigator({
           <TouchableOpacity style={styles.backButton} onPress={_goBack} >
             <Ionicons name={'md-arrow-back'} size={26} color='white' />
           </TouchableOpacity>
-          <Text style={styles.headerCaption}>Add New Photo</Text>
+          <Text style={styles.headerCaption}>Photo</Text>
+        </View>
+      ),
+    },
+  },
+  Photo: {
+    screen: PhotoScreen,
+    navigationOptions: {
+      header: (
+        <View style={styles.headerContainer}>
+          <Image
+            style={styles.headerImage}
+            source={headerBackground}
+          />
+          <TouchableOpacity style={styles.backButton} onPress={_goBack} >
+            <Ionicons name={'md-arrow-back'} size={26} color='white' />
+          </TouchableOpacity>
+          <Text style={styles.headerCaption}>Photo</Text>
         </View>
       ),
     },

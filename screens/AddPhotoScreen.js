@@ -20,14 +20,15 @@ export default class AddPhotoScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: "",
-      image: "",
+      id: 0,
+      photo: "",
       name: "",
       description: "",
       address: "",
       price: 0,
       nameError: "",
     };
+
   }
 
   async componentDidMount() {
@@ -35,13 +36,20 @@ export default class AddPhotoScreen extends React.Component {
     // if (cameraStatus !== 'granted') {
     //   this.props.navigation.goBack();
     // }
+    if(this.props.navigation.getParam('itemId')) {
+      await this.setState(
+        this.props.navigation.getParam('itemId')
+      );
+    }
     if(Platform.OS === 'ios') {
       let { cameraRollStatus } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
       if (cameraRollStatus !== 'granted') {
         this.props.navigation.goBack();
       }
     }
-    this._pickImage(true);
+    if(this.state.id == 0) {
+      this._pickImage(true);
+    }
   }
 
   _pickImage = async (first) => {
@@ -52,7 +60,7 @@ export default class AddPhotoScreen extends React.Component {
       quality: 1,
     });
     if (!result.cancelled) {
-      this.setState({ image: result.uri });
+      this.setState({ photo: result.uri });
     }
     else if(first){
       this.props.navigation.goBack();
@@ -64,19 +72,27 @@ export default class AddPhotoScreen extends React.Component {
     let price = this.state.price;
     let description = String.prototype.trim.call(this.state.description);
     let address = String.prototype.trim.call(this.state.address);
-    let image = this.state.image;
+    let photo = this.state.photo;
     let userToken = await AsyncStorage.getItem('userToken');
     let username = JSON.parse(userToken)['username'];
+    console.log(this.state);
     if(this.state.name !== "") {
-      Database.transaction(
-        tx => {
-          tx.executeSql('insert into images (photo, name, description, price, address, username) values (?, ?, ?, ?, ?, ?)', [image, name, description, price, address, username], this.props.navigation.goBack());
-          tx.executeSql('select * from images', [], (_, { rows }) =>
-            console.log(JSON.stringify(rows))
-          );
-        },
-        null,
-      );
+      if(this.state.id !== 0) {
+        Database.transaction(
+          tx => {
+            tx.executeSql('update images set photo = ?, name = ?, description = ?, price = ?, address = ? where id = ?', [photo, name, description, price, address, this.state.id], () => this.props.navigation.goBack());
+          },
+          null,
+        );
+      }
+      else {
+        Database.transaction(
+          tx => {
+            tx.executeSql('insert into images (photo, name, description, price, address, username) values (?, ?, ?, ?, ?, ?)', [photo, name, description, price, address, username], () => this.props.navigation.goBack());
+          },
+          null,
+        );
+      }
     }
     else {
       this.setState({nameError: 'Please fill the name'});
@@ -91,7 +107,7 @@ export default class AddPhotoScreen extends React.Component {
             onPress={() => this._pickImage(false)}
           >
             <Image
-              source={(this.state.image === "")?require('../assets/images/white-logo.png'):{ uri: this.state.image }}
+              source={(this.state.photo === "")?require('../assets/images/white-logo.png'):{ uri: this.state.photo }}
               style={styles.itemImage}
               resizeMode='cover'
             />
