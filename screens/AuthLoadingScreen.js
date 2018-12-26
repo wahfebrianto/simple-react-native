@@ -25,7 +25,22 @@ export default class AuthLoadingScreen extends React.Component {
     const userToken = await AsyncStorage.getItem('userToken');
     if(userToken)
     {
-      this.props.navigation.navigate('Main');
+      const isLogout = this.props.navigation.getParam('logout', false);
+      if(isLogout) {
+        let userID = JSON.parse(userToken)['id'];
+        Database.transaction(
+          txn => {
+            txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+            [userID, "logout from account"]);
+          },
+          null,
+        );
+        await AsyncStorage.clear();
+        this.props.navigation.navigate('Auth');
+      }
+      else {
+        this.props.navigation.navigate('Main');
+      }
     }
     else
     {
@@ -39,11 +54,13 @@ export default class AuthLoadingScreen extends React.Component {
         var self = this;
         Database.transaction(function(txn) {
           txn.executeSql(
-            "SELECT id, username, is_admin FROM users WHERE username=? AND password=? AND is_active=?",
-            [username, md5(password), true],
+            "SELECT id, username, is_admin FROM users WHERE username=? AND password=? AND is_active=1",
+            [username, md5(password)],
             function(tx, res) {
               if (res.rows.length > 0) {
                 self._saveUserToken(res.rows._array[0]);
+                txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+                [res.rows._array[0].id, "login into account"]);
                 self.props.navigation.navigate('Main');
               }
               else {

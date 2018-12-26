@@ -25,7 +25,7 @@ export default class AddPhotoScreen extends React.Component {
       name: "",
       description: "",
       address: "",
-      price: 0,
+      price: "",
       nameError: "",
     };
 
@@ -40,6 +40,9 @@ export default class AddPhotoScreen extends React.Component {
       await this.setState(
         this.props.navigation.getParam('itemId')
       );
+      this.setState({
+          price: this.state.price,
+      });
     }
     if(Platform.OS === 'ios') {
       let { cameraRollStatus } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -69,18 +72,22 @@ export default class AddPhotoScreen extends React.Component {
 
   _saveData = async () => {
     let name = String.prototype.trim.call(this.state.name);
-    let price = this.state.price;
+    let price = parseFloat(this.state.price)+"";
     let description = String.prototype.trim.call(this.state.description);
     let address = String.prototype.trim.call(this.state.address);
     let photo = this.state.photo;
     let userToken = await AsyncStorage.getItem('userToken');
     let username = JSON.parse(userToken)['username'];
-    console.log(this.state);
+    let userID = JSON.parse(userToken)['id'];
     if(this.state.name !== "") {
       if(this.state.id !== 0) {
         Database.transaction(
           tx => {
-            tx.executeSql('update images set photo = ?, name = ?, description = ?, price = ?, address = ? where id = ?', [photo, name, description, price, address, this.state.id], () => this.props.navigation.goBack());
+            tx.executeSql('update images set photo = ?, name = ?, description = ?, price = ?, address = ? where id = ?', [photo, name, description, price, address, this.state.id], () => {
+              tx.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+              [userID, "edit data : " + name + '[' + this.state.id + ']']);
+              this.props.navigation.goBack();
+            });
           },
           null,
         );
@@ -88,7 +95,11 @@ export default class AddPhotoScreen extends React.Component {
       else {
         Database.transaction(
           tx => {
-            tx.executeSql('insert into images (photo, name, description, price, address, username) values (?, ?, ?, ?, ?, ?)', [photo, name, description, price, address, username], () => this.props.navigation.goBack());
+            tx.executeSql('insert into images (photo, name, description, price, address, username) values (?, ?, ?, ?, ?, ?)', [photo, name, description, price, address, username], (_, res) => {
+              tx.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+              [userID, "insert data : " + name + '[' + res.insertId + ']']);
+              this.props.navigation.goBack();
+            });
           },
           null,
         );
@@ -140,8 +151,8 @@ export default class AddPhotoScreen extends React.Component {
                 errorStyle={styles.formError}
                 containerStyle={styles.formContainer}
                 InputContainerStyle={styles.formInputContainer}
-                value={this.state.price+""}
-                onChangeText={(text) => this.setState({price: isNaN(parseFloat(text))?0:parseFloat(text)})}
+                value={this.state.price}
+                onChangeText={(text) => this.setState({price: text})}
               />
             </View>
           </View>

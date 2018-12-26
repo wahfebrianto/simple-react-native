@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  AsyncStorage,
 } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import { AntDesign } from '@expo/vector-icons';
@@ -27,100 +28,23 @@ export default class HomeScreen extends React.Component {
     this.addNewPhoto = this.addNewPhoto.bind(this);
   }
 
-  componentDidMount() {
-    // this.props.gridStateActions.loadData(); LOAD DATA
-    const listData = [{
-      id: "1",
-      username: 'Jackrexx',
-      name: 'CHICKEN STEAK BURGER',
-      description: 'Chicken steak inside the burger',
-      price: 1.99,
-      photo: 'https://reactnativestarter.com/demo/images/city-sunny-people-street.jpg',
-    }, {
-      id: "2",
-      username: 'reynoldkevin',
-      name: 'HONGKONG FRIED RICE',
-      description: 'Fried rice with carrot, greenbeans, and beef',
-      price: 3.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-26549.jpg',
-    }, {
-      id: "3",
-      username: 'tancejang',
-      name: 'SALMON SUSHI',
-      description: 'Sushi with salmon inside',
-      price: 7.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-30360.jpg',
-    }, {
-      id: "4",
-      username: 'blacklarsa',
-      name: 'CANTONESE FRIED NOODLE',
-      description: 'Fried noodle with cantonese style',
-      price: 5.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-37839.jpg',
-    }, {
-      id: "5",
-      username: 'ardyputra',
-      name: 'GREEN SALAD',
-      description: 'Salad with many green and fresh vegetables',
-      price: 2.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-69212.jpg',
-    }, {
-      id: "6",
-      username: 'stevenchristian',
-      name: 'FISH FILLET BURGER',
-      description: 'Burger with fish fillet inside',
-      price: 3.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-108061.jpg',
-    },
-    {
-      id: "7",
-      username: 'gregorian',
-      name: 'WAGYU STEAK',
-      description: 'Wagyu steak with barbeque sauce',
-      price: 22.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-126371.jpg',
-    }, {
-      id: "8",
-      username: 'RKW',
-      name: 'HAINANESE CHICKEN RICE',
-      description: 'Chicken rice with hainanese style',
-      price: 6.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-165888.jpg',
-    }, {
-      id: "9",
-      username: 'hufungxian',
-      name: 'WONTON NOODLE',
-      description: 'Soup noodle with pork wonton',
-      price: 3.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-167854.jpg',
-    }, {
-      id: "10",
-      username: 'yosikristian',
-      name: 'BABY OCTOPUS SANDWICH',
-      description: 'Sandwich with baby octopus inside',
-      price: 11.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-173427.jpg',
-    }, {
-      id: "11",
-      username: 'rhomairama',
-      name: 'TURKEY STEAK',
-      description: 'Steak made by turkey chest',
-      price: 21.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-175696.jpg',
-    }, {
-      id: "12",
-      username: 'iisdahlia',
-      name: 'JAPANESE CHICKEN CURRY RICE',
-      description: 'Japanese chicken curry rice with vegetables',
-      price: 4.99,
-      photo: 'https://reactnativestarter.com/demo/images/pexels-photo-175733.jpg',
-    }];
+  async componentDidMount() {
+    let userToken = await AsyncStorage.getItem('userToken');
+    let userID = JSON.parse(userToken)['id'];
     const didFocusSubscription = this.props.navigation.addListener(
       'didFocus',
       payload => {
         this.loadData();
       }
     );
+    Database.transaction(
+      txn => {
+        txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+        [userID, "launch the app"]);
+      },
+      null,
+    );
+    this.loadData();
   }
 
   loadData() {
@@ -136,7 +60,16 @@ export default class HomeScreen extends React.Component {
     );
   }
 
-  _openData(data) {
+  async _openData(data) {
+    let userToken = await AsyncStorage.getItem('userToken');
+    let userID = JSON.parse(userToken)['id'];
+    Database.transaction(
+      txn => {
+        txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+        [userID, "view data : " + data.name + '[' + data.id + ']']);
+      },
+      null,
+    );
     this.props.navigation.navigate('Photo', {itemId: data});
   }
 
@@ -159,7 +92,7 @@ export default class HomeScreen extends React.Component {
               <Text style={styles.itemSubtitle} numberOfLines={1}>{item.description}</Text>
             </View>
             <View style={styles.itemMetaContainer}>
-              <Text style={styles.itemPrice}>${item.price+""}</Text>
+              <Text style={styles.itemPrice}>${item.price}</Text>
             </View>
           </View>
         </View>

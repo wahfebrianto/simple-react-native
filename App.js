@@ -25,12 +25,12 @@ export default class App extends React.Component {
           if (res.rows.length == 0 || false) {
             tx.executeSql('DROP TABLE IF EXISTS users', []);
             tx.executeSql(
-              'CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(30) UNIQUE, password VARCHAR(255), is_admin BOOLEAN, is_active BOOLEAN)',
+              'CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(30) UNIQUE, password VARCHAR(255), is_admin TINYINT, is_active TINYINT)',
               []
             );
             tx.executeSql('DROP TABLE IF EXISTS images', []);
             tx.executeSql(
-              "CREATE TABLE IF NOT EXISTS images(id INTEGER PRIMARY KEY AUTOINCREMENT, photo VARCHAR(255), name VARCHAR(255), description VARCHAR(255), address VARCHAR(255), price FLOAT(5,2), username VARCHAR(30), is_active BOOLEAN DEFAULT(1))",
+              "CREATE TABLE IF NOT EXISTS images(id INTEGER PRIMARY KEY AUTOINCREMENT, photo VARCHAR(255), name VARCHAR(255), description VARCHAR(255), address VARCHAR(255), price VARCHAR(255), username VARCHAR(30), is_active TINYINT DEFAULT(1))",
               []
             );
             tx.executeSql('DROP TABLE IF EXISTS logs', []);
@@ -40,23 +40,23 @@ export default class App extends React.Component {
             );
             tx.executeSql(
               'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['administrator', md5('secret'), true, true]
+              ['administrator', md5('secret'), 1, 1]
             );
             tx.executeSql(
               'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['administrator2', md5('secret'), true, true]
+              ['administrator2', md5('secret'), 1, 1]
             );
             tx.executeSql(
               'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['johndoe', md5('helloworld'), false, true]
+              ['johndoe', md5('helloworld'), 0, 1]
             );
             tx.executeSql(
               'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['reynold', md5('welcome'), false, true]
+              ['reynold', md5('welcome'), 0, 1]
             );
             tx.executeSql(
               'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['bumblebee', md5('yellow'), false, false]
+              ['bumblebee', md5('yellow'), 0, 0]
             );
           }
         }

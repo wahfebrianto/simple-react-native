@@ -27,7 +27,7 @@ export default class AddPhotoScreen extends React.Component {
       name: "",
       description: "",
       address: "",
-      price: 0,
+      price: "",
     };
 
   }
@@ -53,18 +53,19 @@ export default class AddPhotoScreen extends React.Component {
           this.setState(
             res.rows._array[0]
           );
-        }, () => console.log('gagal'));
+        });
       },
       null,
     );
   }
 
   _goEditImage() {
-    console.log('masuk');
     this.props.navigation.navigate('AddPhoto', {itemId: this.state});
   }
 
-  _goDeleteImage() {
+  async _goDeleteImage() {
+    let userToken = await AsyncStorage.getItem('userToken');
+    let userID = JSON.parse(userToken)['id'];
     Alert.alert(
       'Delete Corfirmation',
       'Are you sure want to delete this data?',
@@ -74,6 +75,8 @@ export default class AddPhotoScreen extends React.Component {
           Database.transaction(
             txn => {
               txn.executeSql("update images set is_active=0 where id=?", [this.state.id], () => {
+                txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
+                [userID, "delete data : " + this.state.name + '[' + this.state.id + ']']);
                 this.props.navigation.goBack();
               }, () => console.log('gagal'));
             },
