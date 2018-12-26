@@ -18,7 +18,6 @@ import AddPhotoScreen from '../screens/AddPhotoScreen';
 import PhotoScreen from '../screens/PhotoScreen';
 import AdminScreen from '../screens/AdminScreen';
 import NavigationService from './NavigationService';
-import Database from '../constants/Database';
 
 const headerBackground = require('../assets/images/topBarBg.png');
 
@@ -75,7 +74,6 @@ const _goBack = () => {
 const _goAdmin = async () => {
   let userToken = await AsyncStorage.getItem('userToken');
   let userIsAdmin = JSON.parse(userToken)['is_admin'];
-  console.log(userIsAdmin);
   if(!userIsAdmin) {
     Alert.alert(
       'Admin Area',

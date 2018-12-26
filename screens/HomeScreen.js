@@ -15,6 +15,7 @@ import { Colors, Fonts } from '../constants';
 import { Button, TextInput, GridRow } from '../components';
 
 import Database from '../constants/Database';
+const db = Database.getInstance();
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
@@ -37,40 +38,24 @@ export default class HomeScreen extends React.Component {
         this.loadData();
       }
     );
-    Database.transaction(
-      txn => {
-        txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-        [userID, "launch the app"]);
-      },
-      null,
-    );
+    db.insertIntoLog(userID, "launch the app");
     this.loadData();
   }
 
   loadData() {
-    Database.transaction(
-      txn => {
-        txn.executeSql("select id, username, name, description, price, photo, address from images where is_active=1 AND (username like ? OR name like ?) order by id desc", [this.state.search, this.state.search], (tx, res) => {
-          this.setState({
-            data: res.rows._array,
-          });
-        }, () => console.log('gagal'));
-      },
-      null,
-    );
+    db.getHomeItem(this.state.search, (data) => {
+      this.setState({
+        data: data,
+      });
+    });
   }
 
   async _openData(data) {
     let userToken = await AsyncStorage.getItem('userToken');
     let userID = JSON.parse(userToken)['id'];
-    Database.transaction(
-      txn => {
-        txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-        [userID, "view data : " + data.name + '[' + data.id + ']']);
-      },
-      null,
-    );
-    this.props.navigation.navigate('Photo', {itemId: data});
+    db.insertIntoLog(userID, "view data : " + data.name + '[' + data.id + ']', () => {
+      this.props.navigation.navigate('Photo', {itemId: data});
+    });
   }
 
   renderRow({ item }) {
@@ -105,8 +90,8 @@ export default class HomeScreen extends React.Component {
     this.props.navigation.navigate('AddPhoto');
   }
 
-  searchbarType(text) {
-    this.setState({search: '%'+text+'%'});
+  async searchbarType(text) {
+    await this.setState({search: '%'+text+'%'});
     this.loadData();
   }
 

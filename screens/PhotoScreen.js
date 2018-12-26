@@ -17,6 +17,7 @@ import { Colors, Fonts } from '../constants';
 import { Button } from '../components';
 
 import Database from '../constants/Database';
+const db = Database.getInstance();
 
 export default class AddPhotoScreen extends React.Component {
   constructor(props) {
@@ -47,16 +48,11 @@ export default class AddPhotoScreen extends React.Component {
   }
 
   loadData() {
-    Database.transaction(
-      txn => {
-        txn.executeSql("select id, name, description, price, photo, address from images where is_active=1 AND id=? order by id desc", [this.state.id], (tx, res) => {
-          this.setState(
-            res.rows._array[0]
-          );
-        });
-      },
-      null,
-    );
+    db.getItemData(this.state.id, (res) => {
+      this.setState(
+        res.rows._array[0]
+      );
+    });
   }
 
   _goEditImage() {
@@ -72,16 +68,9 @@ export default class AddPhotoScreen extends React.Component {
       [
         {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
         {text: 'OK', onPress: () => {
-          Database.transaction(
-            txn => {
-              txn.executeSql("update images set is_active=0 where id=?", [this.state.id], () => {
-                txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-                [userID, "delete data : " + this.state.name + '[' + this.state.id + ']']);
-                this.props.navigation.goBack();
-              }, () => console.log('gagal'));
-            },
-            null,
-          );
+          db.deleteData(this.state.id, this.state.name, userID, () => {
+            this.props.navigation.goBack();
+          });
         }},
       ],
       { cancelable: false }

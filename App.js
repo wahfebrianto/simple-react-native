@@ -7,6 +7,7 @@ import md5 from 'md5';
 import FlashMessage from "react-native-flash-message";
 
 import Database from './constants/Database';
+const db = Database.getInstance();
 
 export default class App extends React.Component {
   state = {
@@ -16,51 +17,13 @@ export default class App extends React.Component {
   componentDidMount() {
     console.disableYellowBox = true;
     UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
-
-    Database.transaction((txn) => {
-      txn.executeSql(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='users'",
-        [],
-        (tx, res) => {
-          if (res.rows.length == 0 || false) {
-            tx.executeSql('DROP TABLE IF EXISTS users', []);
-            tx.executeSql(
-              'CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(30) UNIQUE, password VARCHAR(255), is_admin TINYINT, is_active TINYINT)',
-              []
-            );
-            tx.executeSql('DROP TABLE IF EXISTS images', []);
-            tx.executeSql(
-              "CREATE TABLE IF NOT EXISTS images(id INTEGER PRIMARY KEY AUTOINCREMENT, photo VARCHAR(255), name VARCHAR(255), description VARCHAR(255), address VARCHAR(255), price VARCHAR(255), username VARCHAR(30), is_active TINYINT DEFAULT(1))",
-              []
-            );
-            tx.executeSql('DROP TABLE IF EXISTS logs', []);
-            tx.executeSql(
-              "CREATE TABLE IF NOT EXISTS logs(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, description VARCHAR(255), time DATETIME DEFAULT(datetime('now','localtime')))",
-              []
-            );
-            tx.executeSql(
-              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['administrator', md5('secret'), 1, 1]
-            );
-            tx.executeSql(
-              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['administrator2', md5('secret'), 1, 1]
-            );
-            tx.executeSql(
-              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['johndoe', md5('helloworld'), 0, 1]
-            );
-            tx.executeSql(
-              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['reynold', md5('welcome'), 0, 1]
-            );
-            tx.executeSql(
-              'INSERT INTO users (username, password, is_admin, is_active) VALUES (?,?,?,?)',
-              ['bumblebee', md5('yellow'), 0, 0]
-            );
-          }
-        }
-      );
+    db.hasTableUser((res) => {
+      if (res.rows.length == 0 || false) {
+        db.createUserTable;
+        db.createImageTable;
+        db.createLogTable;
+        db.seedUserTable;
+      }
     });
   }
 

@@ -16,6 +16,7 @@ import PureChart from 'react-native-pure-chart';
 import { Colors, Fonts } from '../constants';
 
 import Database from '../constants/Database';
+const db = Database.getInstance();
 
 export default class AdminScreen extends React.Component {
   constructor(props) {
@@ -48,34 +49,26 @@ export default class AdminScreen extends React.Component {
   }
 
   async loadData() {
-    Database.transaction(
-      txn => {
-        txn.executeSql("select logs.id as id, users.username as username, logs.description as description, logs.time as time from logs, users where users.id = logs.user_id order by logs.id desc", [], async (tx, res) => {
-          await this.setState({
-            log: res.rows._array,
-          });
-        });
-
-        txn.executeSql("select date(time) as x, count(*) as y from logs where description like 'launch%' group by x", [], (tx, res) => {
-          this.setState({
-            launchData: res.rows._array,
-          });
-        });
-
-        txn.executeSql("select date(time) as x, count(*) as y from logs where description like 'view%' group by x", [], (tx, res) => {
-          this.setState({
-            viewData: res.rows._array,
-          });
-        });
-
-        txn.executeSql("select date(time) as x, count(*) as y from logs where description like 'insert%' group by x", [], (tx, res) => {
-          this.setState({
-            insertData: res.rows._array,
-          });
-        });
-      },
-      null,
-    );
+    db.getAllLogData((res) => {
+      this.setState({
+        log: res.rows._array,
+      });
+    });
+    db.getChartData('launch%', (res) => {
+      this.setState({
+        launchData: res.rows._array,
+      });
+    });
+    db.getChartData('view%', (res) => {
+      this.setState({
+        viewData: res.rows._array,
+      });
+    });
+    db.getChartData('insert%', (res) => {
+      this.setState({
+        insertData: res.rows._array,
+      });
+    });
   }
 
   renderRow({ item }) {

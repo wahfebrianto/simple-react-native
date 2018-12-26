@@ -15,6 +15,7 @@ import { Colors, Fonts } from '../constants';
 import { Button } from '../components';
 
 import Database from '../constants/Database';
+const db = Database.getInstance();
 
 export default class AddPhotoScreen extends React.Component {
   constructor(props) {
@@ -28,7 +29,6 @@ export default class AddPhotoScreen extends React.Component {
       price: "",
       nameError: "",
     };
-
   }
 
   async componentDidMount() {
@@ -72,7 +72,8 @@ export default class AddPhotoScreen extends React.Component {
 
   _saveData = async () => {
     let name = String.prototype.trim.call(this.state.name);
-    let price = parseFloat(this.state.price)+"";
+    let floatPrice = parseFloat(this.state.price);
+    let price = (isNaN(floatPrice)?0:floatPrice)+"";
     let description = String.prototype.trim.call(this.state.description);
     let address = String.prototype.trim.call(this.state.address);
     let photo = this.state.photo;
@@ -81,28 +82,14 @@ export default class AddPhotoScreen extends React.Component {
     let userID = JSON.parse(userToken)['id'];
     if(this.state.name !== "") {
       if(this.state.id !== 0) {
-        Database.transaction(
-          tx => {
-            tx.executeSql('update images set photo = ?, name = ?, description = ?, price = ?, address = ? where id = ?', [photo, name, description, price, address, this.state.id], () => {
-              tx.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-              [userID, "edit data : " + name + '[' + this.state.id + ']']);
-              this.props.navigation.goBack();
-            });
-          },
-          null,
-        );
+        db.updateData(this.state.id, [photo, name, description, price, address], userID, () => {
+          this.props.navigation.goBack();
+        });
       }
       else {
-        Database.transaction(
-          tx => {
-            tx.executeSql('insert into images (photo, name, description, price, address, username) values (?, ?, ?, ?, ?, ?)', [photo, name, description, price, address, username], (_, res) => {
-              tx.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-              [userID, "insert data : " + name + '[' + res.insertId + ']']);
-              this.props.navigation.goBack();
-            });
-          },
-          null,
-        );
+        db.insertData([photo, name, description, price, address, username], userID, () => {
+          this.props.navigation.goBack();
+        });
       }
     }
     else {

@@ -9,6 +9,7 @@ import {
 import md5 from 'md5';
 
 import Database from '../constants/Database';
+const db = Database.getInstance();
 
 export default class AuthLoadingScreen extends React.Component {
   constructor(props) {
@@ -20,7 +21,6 @@ export default class AuthLoadingScreen extends React.Component {
     await AsyncStorage.setItem('userToken', JSON.stringify(userToken));
   }
 
-  // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
     const userToken = await AsyncStorage.getItem('userToken');
     if(userToken)
@@ -28,13 +28,7 @@ export default class AuthLoadingScreen extends React.Component {
       const isLogout = this.props.navigation.getParam('logout', false);
       if(isLogout) {
         let userID = JSON.parse(userToken)['id'];
-        Database.transaction(
-          txn => {
-            txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-            [userID, "logout from account"]);
-          },
-          null,
-        );
+        db.insertIntoLog(userID, "logout from account");
         await AsyncStorage.clear();
         this.props.navigation.navigate('Auth');
       }
@@ -51,23 +45,16 @@ export default class AuthLoadingScreen extends React.Component {
         this.props.navigation.navigate('Auth', {errorMessage: "Please fill Username and Password!", firstAttempt: firstAttempt});
       }
       else {
-        var self = this;
-        Database.transaction(function(txn) {
-          txn.executeSql(
-            "SELECT id, username, is_admin FROM users WHERE username=? AND password=? AND is_active=1",
-            [username, md5(password)],
-            function(tx, res) {
-              if (res.rows.length > 0) {
-                self._saveUserToken(res.rows._array[0]);
-                txn.executeSql("INSERT INTO logs (user_id, description) VALUES (?,?)",
-                [res.rows._array[0].id, "login into account"]);
-                self.props.navigation.navigate('Main');
-              }
-              else {
-                self.props.navigation.navigate('Auth', {errorMessage: 'Credential not found!', firstAttempt: firstAttempt});
-              }
-            }
-          );
+        db.getUserToken(username, password, (res) => {
+          if (res.rows.length > 0) {
+            this._saveUserToken(res.rows._array[0]);
+            db.insertIntoLog(res.rows._array[0].id, "login into account", () => {
+              this.props.navigation.navigate('Main');
+            });
+          }
+          else {
+            this.props.navigation.navigate('Auth', {errorMessage: 'Credential not found!', firstAttempt: firstAttempt});
+          }
         });
       }
     }
