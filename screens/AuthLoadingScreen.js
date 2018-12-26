@@ -17,14 +17,17 @@ export default class AuthLoadingScreen extends React.Component {
     this._bootstrapAsync();
   }
 
+  // save user data to asyncstorage
   _saveUserToken = async (userToken) => {
     await AsyncStorage.setItem('userToken', JSON.stringify(userToken));
   }
 
   _bootstrapAsync = async () => {
     const userToken = await AsyncStorage.getItem('userToken');
+    // check is user has been logon
     if(userToken)
     {
+      // check is user logging out
       const isLogout = this.props.navigation.getParam('logout', false);
       if(isLogout) {
         let userID = JSON.parse(userToken)['id'];
@@ -41,10 +44,12 @@ export default class AuthLoadingScreen extends React.Component {
       const username = this.props.navigation.getParam('username', '');
       const password = this.props.navigation.getParam('password', '');
       const firstAttempt = this.props.navigation.getParam('firstAttempt', true);
+      // check is user submit empty form input
       if(username == '' || password == '') {
         this.props.navigation.navigate('Auth', {errorMessage: "Please fill Username and Password!", firstAttempt: firstAttempt});
       }
       else {
+        // check if username and password right
         db.getUserToken(username, password, (res) => {
           if (res.rows.length > 0) {
             this._saveUserToken(res.rows._array[0]);

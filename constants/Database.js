@@ -3,6 +3,7 @@ import md5 from 'md5';
 
 const db = SQLite.openDatabase('FoodNoteDB.db');
 
+//Singleton Class
 export default class Database {
   static myInstance = null;
 
@@ -13,6 +14,7 @@ export default class Database {
       return this.myInstance;
   }
 
+  //Check if phone user have sqlite database structure
   hasTableUser(_callback) {
     db.transaction((txn) => {
       txn.executeSql(
@@ -63,6 +65,7 @@ export default class Database {
     );
   }
 
+  // insert user to users table
   seedUserTable() {
     db.transaction(
       tx => {
@@ -90,6 +93,7 @@ export default class Database {
     );
   }
 
+  // doing insert to logs table
   insertIntoLog(userID, description, _callback) {
     db.transaction(
       txn => {
@@ -104,6 +108,7 @@ export default class Database {
     );
   }
 
+  // get logon user data
   getUserToken(username, password, _callback) {
     db.transaction(function(txn) {
       txn.executeSql(
@@ -118,6 +123,7 @@ export default class Database {
     });
   }
 
+  // get items shown in home page
   getHomeItem(searchText, _callback) {
     db.transaction(
       txn => {
@@ -130,6 +136,7 @@ export default class Database {
     );
   }
 
+  // update data of the image and insert to log
   updateData(id, data, userID, _callback) {
     db.transaction(
       tx => {
@@ -143,6 +150,7 @@ export default class Database {
     );
   }
 
+  // insert data of the image and insert to log
   insertData(data, userID, _callback) {
     db.transaction(
       tx => {
@@ -156,6 +164,7 @@ export default class Database {
     );
   }
 
+  // get item data based on id
   getItemData(id, _callback) {
     db.transaction(
       txn => {
@@ -168,6 +177,7 @@ export default class Database {
     );
   }
 
+  // delete image data and insert to log
   deleteData(id, name, userID, _callback) {
     db.transaction(
       txn => {
@@ -193,6 +203,7 @@ export default class Database {
     );
   }
 
+  // get x and y data for chart axis
   getChartData(type, _callback) {
     db.transaction(
       txn => {

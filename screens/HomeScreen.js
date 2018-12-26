@@ -42,6 +42,7 @@ export default class HomeScreen extends React.Component {
     this.loadData();
   }
 
+  // get data to show at the flatlist
   loadData() {
     db.getHomeItem(this.state.search, (data) => {
       this.setState({
@@ -50,6 +51,7 @@ export default class HomeScreen extends React.Component {
     });
   }
 
+  // open the pressed data
   async _openData(data) {
     let userToken = await AsyncStorage.getItem('userToken');
     let userID = JSON.parse(userToken)['id'];
@@ -58,6 +60,7 @@ export default class HomeScreen extends React.Component {
     });
   }
 
+  // render item in each element of flatlist
   renderRow({ item }) {
     return (
       <TouchableOpacity
@@ -86,10 +89,12 @@ export default class HomeScreen extends React.Component {
     );
   }
 
+  // add new photo when user click the action button
   addNewPhoto() {
     this.props.navigation.navigate('AddPhoto');
   }
 
+  // filter data from what user search by username and name of the item
   async searchbarType(text) {
     await this.setState({search: '%'+text+'%'});
     this.loadData();

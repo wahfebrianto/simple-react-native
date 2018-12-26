@@ -44,6 +44,7 @@ export default class AddPhotoScreen extends React.Component {
           price: this.state.price,
       });
     }
+    // ask for camera roll Permission for iOS
     if(Platform.OS === 'ios') {
       let { cameraRollStatus } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
       if (cameraRollStatus !== 'granted') {
@@ -55,6 +56,7 @@ export default class AddPhotoScreen extends React.Component {
     }
   }
 
+  // show Image picker to choose image that want to upload
   _pickImage = async (first) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'Images',
@@ -70,6 +72,7 @@ export default class AddPhotoScreen extends React.Component {
     }
   };
 
+  // save the completed data
   _saveData = async () => {
     let name = String.prototype.trim.call(this.state.name);
     let floatPrice = parseFloat(this.state.price);
@@ -80,7 +83,9 @@ export default class AddPhotoScreen extends React.Component {
     let userToken = await AsyncStorage.getItem('userToken');
     let username = JSON.parse(userToken)['username'];
     let userID = JSON.parse(userToken)['id'];
+    // check name must be filled
     if(this.state.name !== "") {
+      // check is this update mode or insert mode
       if(this.state.id !== 0) {
         db.updateData(this.state.id, [photo, name, description, price, address], userID, () => {
           this.props.navigation.goBack();

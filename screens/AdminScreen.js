@@ -30,6 +30,7 @@ export default class AdminScreen extends React.Component {
   }
 
   async componentWillMount() {
+    // check is user permitted to access this page by checking is_admin attribute
     let userToken = await AsyncStorage.getItem('userToken');
     let userIsAdmin = JSON.parse(userToken)['is_admin'];
     if(!userIsAdmin) {
@@ -49,21 +50,25 @@ export default class AdminScreen extends React.Component {
   }
 
   async loadData() {
+    // load data for log flat list
     db.getAllLogData((res) => {
       this.setState({
         log: res.rows._array,
       });
     });
+    // load data for launch application chart
     db.getChartData('launch%', (res) => {
       this.setState({
         launchData: res.rows._array,
       });
     });
+    // load data for view post chart
     db.getChartData('view%', (res) => {
       this.setState({
         viewData: res.rows._array,
       });
     });
+    // laod data for insert post chart
     db.getChartData('insert%', (res) => {
       this.setState({
         insertData: res.rows._array,

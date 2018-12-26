@@ -47,6 +47,7 @@ export default class AddPhotoScreen extends React.Component {
     );
   }
 
+  // load item data by id
   loadData() {
     db.getItemData(this.state.id, (res) => {
       this.setState(
@@ -59,6 +60,8 @@ export default class AddPhotoScreen extends React.Component {
     this.props.navigation.navigate('AddPhoto', {itemId: this.state});
   }
 
+  // show delete confirmation when user press the trash can icon on the image.
+  // press OK to delete
   async _goDeleteImage() {
     let userToken = await AsyncStorage.getItem('userToken');
     let userID = JSON.parse(userToken)['id'];
