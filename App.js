@@ -17,14 +17,7 @@ export default class App extends React.Component {
   componentDidMount() {
     console.disableYellowBox = true;
     UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
-    db.hasTableUser((res) => {
-      if (res.rows.length == 0 || false) {
-        db.createUserTable;
-        db.createImageTable;
-        db.createLogTable;
-        db.seedUserTable;
-      }
-    });
+    db.hasTableUser();
   }
 
   render() {

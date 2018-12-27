@@ -14,15 +14,18 @@ export default class Database {
       return this.myInstance;
   }
 
-  //Check if phone user have sqlite database structure
-  hasTableUser(_callback) {
+  //Check if phone user have sqlite database structure, if not create tables
+  hasTableUser() {
     db.transaction((txn) => {
       txn.executeSql(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='users'",
         [],
         (tx, res) => {
-          if(_callback){
-            _callback(res);
+          if (res.rows.length == 0 || false) {
+            this.createUserTable();
+            this.createImageTable();
+            this.createLogTable();
+            this.seedUserTable();
           }
         }
       );
