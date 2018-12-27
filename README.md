@@ -14,3 +14,12 @@ npm install -g expo-cli
 expo build:android
 expo build:ios
 ```
+## User Account
+There are several account to access this application
+```
+username:password:is_admin
+administrator:secret:1
+administrator2:secret:1
+johndoe:helloworld:0
+reynold:welcome:0
+```
